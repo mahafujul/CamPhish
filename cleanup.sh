@@ -8,11 +8,18 @@ echo "Starting cleanup of unnecessary files and logs..."
 echo "Removing log files..."
 rm -f *.log
 rm -f .cloudflared.log
+rm -f ip.txt
+rm -f saved.ip.txt
+rm -f saved.locations.txt
 
 # Remove temporary location files
 echo "Removing temporary location files..."
 rm -f location_*.txt
 rm -f current_location.bak
+
+# Remove credentials files
+echo "Removing credentials files..."
+rm -f credentials_*.txt
 
 # Remove captured images
 echo "Removing captured images..."

